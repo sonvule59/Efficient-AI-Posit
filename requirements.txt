@@ -1,0 +1,5 @@
+# Core numerical stack
+numpy
+# Deep-learning framework
+torch>=2.2     # or the latest that matches your CUDA / CPU setup
+matplotlib>=3.7
