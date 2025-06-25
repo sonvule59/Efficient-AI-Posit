@@ -91,7 +91,7 @@ def posit16_es2_from_bits(b):
 
 
 # ============================================================
-# 2.  Build “decoder” lambdas for each numeric format
+# 2.  Build "decoder" lambdas for each numeric format
 #     (we will use them to initialise weights later)
 # ============================================================
 decoders = {
@@ -111,8 +111,8 @@ class STEQuant(torch.autograd.Function):
         return torch.from_numpy(np.asarray(q, dtype=np.float32)).to(tensor.device)
 
     @staticmethod
-    def backward(ctx, grad_output):
-        return grad_output, None
+    def backward(ctx, grad_outputs):
+        return grad_outputs, None
 
 def make_quant_fn(np_quant):
     return lambda t: STEQuant.apply(t, np_quant)
