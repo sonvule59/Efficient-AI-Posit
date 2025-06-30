@@ -225,3 +225,4 @@ weakLLM_cuda_examples/Project_CodeNet_C++1000/
 POSIT_DEV/
 .DS_Store
 QPyTorch-master/MANIFEST.in
+properties.json
