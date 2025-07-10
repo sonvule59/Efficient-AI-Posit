@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "posit.h"
+#include "posit_sfp.h"
 
 int main(void) {
     posit32 a, b, c, d;
