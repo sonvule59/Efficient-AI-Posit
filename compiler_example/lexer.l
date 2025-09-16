@@ -14,6 +14,7 @@
 "float"         { return FLOAT; }
 "double"        { return DOUBLE; }
 [0-9]+(\.[0-9]+)?p(8|16|32) { yylval.str = strdup(yytext); return POSIT_LITERAL; }
+[0-9]+(\.[0-9]+)? { yylval.str = strdup(yytext); return POSIT_LITERAL; }
 [a-zA-Z_][a-zA-Z0-9_]* { yylval.str = strdup(yytext); return IDENTIFIER; }
 "+"             { return PLUS; }
 "-"             { return MINUS; }

@@ -356,8 +356,8 @@ static void yynoreturn yy_fatal_error ( const char* msg  );
 	(yy_hold_char) = *yy_cp; \
 	*yy_cp = '\0'; \
 	(yy_c_buf_p) = yy_cp;
-#define YY_NUM_RULES 21
-#define YY_END_OF_BUFFER 22
+#define YY_NUM_RULES 22
+#define YY_END_OF_BUFFER 23
 /* This struct is not used in this scanner,
    but its presence is necessary. */
 struct yy_trans_info
@@ -367,12 +367,12 @@ struct yy_trans_info
 	};
 static const flex_int16_t yy_accept[56] =
     {   0,
-        0,    0,   22,   20,   19,   19,   15,   16,   11,    9,
-       10,   12,   20,   14,   13,    8,    8,    8,    8,    8,
-       17,   18,    0,    0,    0,    8,    8,    8,    8,    8,
-        0,    0,    0,    7,    8,    8,    8,    8,    8,    8,
-        8,    8,    8,    5,    8,    8,    6,    8,    8,    1,
-        8,    2,    3,    4,    0
+        0,    0,   23,   21,   20,   20,   16,   17,   12,   10,
+       11,   13,    8,   15,   14,    9,    9,    9,    9,    9,
+       18,   19,    0,    8,    0,    9,    9,    9,    9,    9,
+        8,    0,    0,    7,    9,    9,    9,    9,    9,    9,
+        9,    9,    9,    5,    9,    9,    6,    9,    9,    1,
+        9,    2,    3,    4,    0
     } ;
 
 static const YY_CHAR yy_ec[256] =
@@ -803,75 +803,80 @@ YY_RULE_SETUP
 case 8:
 YY_RULE_SETUP
 #line 17 "lexer.l"
-{ yylval.str = strdup(yytext); return IDENTIFIER; }
+{ yylval.str = strdup(yytext); return POSIT_LITERAL; }
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
 #line 18 "lexer.l"
-{ return PLUS; }
+{ yylval.str = strdup(yytext); return IDENTIFIER; }
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
 #line 19 "lexer.l"
-{ return MINUS; }
+{ return PLUS; }
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
 #line 20 "lexer.l"
-{ return MULT; }
+{ return MINUS; }
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
 #line 21 "lexer.l"
-{ return DIV; }
+{ return MULT; }
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
 #line 22 "lexer.l"
-{ return ASSIGN; }
+{ return DIV; }
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
 #line 23 "lexer.l"
-{ return SEMICOLON; }
+{ return ASSIGN; }
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
 #line 24 "lexer.l"
-{ return LPAREN; }
+{ return SEMICOLON; }
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
 #line 25 "lexer.l"
-{ return RPAREN; }
+{ return LPAREN; }
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
 #line 26 "lexer.l"
-{ return LBRACE; }
+{ return RPAREN; }
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
 #line 27 "lexer.l"
-{ return RBRACE; }
+{ return LBRACE; }
 	YY_BREAK
 case 19:
-/* rule 19 can match eol */
 YY_RULE_SETUP
 #line 28 "lexer.l"
-{ /* Ignore whitespace */ }
+{ return RBRACE; }
 	YY_BREAK
 case 20:
+/* rule 20 can match eol */
 YY_RULE_SETUP
 #line 29 "lexer.l"
-{ printf("Unknown token: %s\n", yytext); }
+{ /* Ignore whitespace */ }
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 31 "lexer.l"
+#line 30 "lexer.l"
+{ printf("Unknown token: %s\n", yytext); }
+	YY_BREAK
+case 22:
+YY_RULE_SETUP
+#line 32 "lexer.l"
 ECHO;
 	YY_BREAK
-#line 874 "posit.lex.c"
+#line 879 "posit.lex.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -1876,5 +1881,5 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 31 "lexer.l"
+#line 32 "lexer.l"
 

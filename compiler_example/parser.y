@@ -16,6 +16,8 @@ extern int yylex(void);
 %token <str> POSIT_LITERAL IDENTIFIER
 %token PLUS MINUS MULT DIV ASSIGN SEMICOLON LPAREN RPAREN LBRACE RBRACE
 
+%left PLUS MINUS
+%left MULT DIV
 %type <str> type expression
 
 %%
@@ -57,9 +59,19 @@ expression:
         snprintf($$, 256, "(%s + %s)", $1, $3);
         free($1); free($3);
     }
+    | expression MINUS expression {
+        $$ = malloc(256);
+        snprintf($$, 256, "(%s - %s)", $1, $3);
+        free($1); free($3);
+    }
     | expression MULT expression {
         $$ = malloc(256);
         snprintf($$, 256, "(%s * %s)", $1, $3);
+        free($1); free($3);
+    }
+    | expression DIV expression {
+        $$ = malloc(256);
+        snprintf($$, 256, "(%s / %s)", $1, $3);
         free($1); free($3);
     }
     | LPAREN expression RPAREN { $$ = $2; }
