@@ -115,10 +115,35 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "posit.h"
+#include "posit8.h"
 
 void yyerror(const char *s);
 extern int yylex(void);
+
+/* Simple temp generator for codegen */
+static int temp_counter = 0;
+static int result_counter = 0;
+static char* new_temp(void) {
+    char buf[32];
+    snprintf(buf, sizeof(buf), "t%d", temp_counter++);
+    return strdup(buf);
+}
+static char* new_result_var(void) {
+    char buf[32];
+    snprintf(buf, sizeof(buf), "result%d", result_counter++);
+    return strdup(buf);
+}
+
+/* Strip posit suffix like p8/p16/p32 from literal text; return malloc'd */
+static char* strip_posit_suffix(const char *text) {
+    const char *p = strchr(text, 'p');
+    if (!p) return strdup(text);
+    size_t n = (size_t)(p - text);
+    char *out = (char*)malloc(n + 1);
+    memcpy(out, text, n);
+    out[n] = '\0';
+    return out;
+}
 
 
 /* Enabling traces.  */
@@ -141,12 +166,12 @@ extern int yylex(void);
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 11 "parser.y"
+#line 36 "parser.y"
 {
     char *str;
 }
 /* Line 193 of yacc.c.  */
-#line 150 "parser.tab.c"
+#line 175 "parser.tab.c"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
@@ -159,7 +184,7 @@ typedef union YYSTYPE
 
 
 /* Line 216 of yacc.c.  */
-#line 163 "parser.tab.c"
+#line 188 "parser.tab.c"
 
 #ifdef short
 # undef short
@@ -448,8 +473,8 @@ static const yytype_int8 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    26,    26,    30,    31,    35,    39,    46,    47,    48,
-      49,    50,    51,    55,    56,    57,    62,    67,    72,    77
+       0,    51,    51,    55,    56,    60,    75,    82,    83,    84,
+      85,    86,    87,    91,   101,   102,   109,   116,   123,   130
 };
 #endif
 
@@ -1370,105 +1395,133 @@ yyreduce:
   switch (yyn)
     {
         case 5:
-#line 35 "parser.y"
+#line 60 "parser.y"
     {
-        printf("Declaration: %s %s = %s;\n", (yyvsp[(1) - (5)].str), (yyvsp[(2) - (5)].str), (yyvsp[(4) - (5)].str));
+        if (strcmp((yyvsp[(1) - (5)].str), "posit8") == 0) {
+            /* Declare and assign from expression temp/value */
+            printf("    posit8 %s = %s;\n", (yyvsp[(2) - (5)].str), (yyvsp[(4) - (5)].str));
+            char *result_var = new_result_var();
+            printf("    double %s;\n", result_var);
+            printf("    posit8_to_double(&%s, %s);\n", result_var, (yyvsp[(2) - (5)].str));
+            printf("    printf(\"Result: %%.6f\\n\", %s);\n", result_var);
+            free(result_var);
+        } else {
+            /* For now: only posit8 codegen is supported */
+            printf("    /* TODO: codegen for type %s */\n", (yyvsp[(1) - (5)].str));
+        }
         free((yyvsp[(1) - (5)].str)); free((yyvsp[(2) - (5)].str)); free((yyvsp[(4) - (5)].str));
     ;}
     break;
 
   case 6:
-#line 39 "parser.y"
+#line 75 "parser.y"
     {
-        printf("Expression: %s;\n", (yyvsp[(1) - (2)].str));
+        /* Expression statement result already materialized via temps */
         free((yyvsp[(1) - (2)].str));
     ;}
     break;
 
   case 7:
-#line 46 "parser.y"
+#line 82 "parser.y"
     { (yyval.str) = strdup("posit8"); ;}
     break;
 
   case 8:
-#line 47 "parser.y"
+#line 83 "parser.y"
     { (yyval.str) = strdup("posit16"); ;}
     break;
 
   case 9:
-#line 48 "parser.y"
+#line 84 "parser.y"
     { (yyval.str) = strdup("posit32"); ;}
     break;
 
   case 10:
-#line 49 "parser.y"
+#line 85 "parser.y"
     { (yyval.str) = strdup("quire32"); ;}
     break;
 
   case 11:
-#line 50 "parser.y"
+#line 86 "parser.y"
     { (yyval.str) = strdup("float"); ;}
     break;
 
   case 12:
-#line 51 "parser.y"
+#line 87 "parser.y"
     { (yyval.str) = strdup("double"); ;}
     break;
 
   case 13:
-#line 55 "parser.y"
-    { (yyval.str) = (yyvsp[(1) - (1)].str); ;}
+#line 91 "parser.y"
+    {
+        /* Materialize literal into a posit8 temp via from_double */
+        char *num = strip_posit_suffix((yyvsp[(1) - (1)].str));
+        char *t = new_temp();
+        printf("    posit8 %s;\n", t);
+        printf("    posit8_from_double(&%s, %s);\n", t, num);
+        free(num);
+        free((yyvsp[(1) - (1)].str));
+        (yyval.str) = t;
+    ;}
     break;
 
   case 14:
-#line 56 "parser.y"
+#line 101 "parser.y"
     { (yyval.str) = (yyvsp[(1) - (1)].str); ;}
     break;
 
   case 15:
-#line 57 "parser.y"
+#line 102 "parser.y"
     {
-        (yyval.str) = malloc(256);
-        snprintf((yyval.str), 256, "(%s + %s)", (yyvsp[(1) - (3)].str), (yyvsp[(3) - (3)].str));
+        char *t = new_temp();
+        printf("    posit8 %s;\n", t);
+        printf("    posit8_add(&%s, %s, %s);\n", t, (yyvsp[(1) - (3)].str), (yyvsp[(3) - (3)].str));
         free((yyvsp[(1) - (3)].str)); free((yyvsp[(3) - (3)].str));
+        (yyval.str) = t;
     ;}
     break;
 
   case 16:
-#line 62 "parser.y"
+#line 109 "parser.y"
     {
-        (yyval.str) = malloc(256);
-        snprintf((yyval.str), 256, "(%s - %s)", (yyvsp[(1) - (3)].str), (yyvsp[(3) - (3)].str));
+        char *t = new_temp();
+        printf("    posit8 %s;\n", t);
+        printf("    posit8_sub(&%s, %s, %s);\n", t, (yyvsp[(1) - (3)].str), (yyvsp[(3) - (3)].str));
         free((yyvsp[(1) - (3)].str)); free((yyvsp[(3) - (3)].str));
+        (yyval.str) = t;
     ;}
     break;
 
   case 17:
-#line 67 "parser.y"
+#line 116 "parser.y"
     {
-        (yyval.str) = malloc(256);
-        snprintf((yyval.str), 256, "(%s * %s)", (yyvsp[(1) - (3)].str), (yyvsp[(3) - (3)].str));
+        char *t = new_temp();
+        printf("    posit8 %s;\n", t);
+        printf("    posit8_mul(&%s, %s, %s);\n", t, (yyvsp[(1) - (3)].str), (yyvsp[(3) - (3)].str));
         free((yyvsp[(1) - (3)].str)); free((yyvsp[(3) - (3)].str));
+        (yyval.str) = t;
     ;}
     break;
 
   case 18:
-#line 72 "parser.y"
+#line 123 "parser.y"
     {
-        (yyval.str) = malloc(256);
-        snprintf((yyval.str), 256, "(%s / %s)", (yyvsp[(1) - (3)].str), (yyvsp[(3) - (3)].str));
+        char *t = new_temp();
+        printf("    posit8 %s;\n", t);
+        printf("    posit8_div(&%s, %s, %s);\n", t, (yyvsp[(1) - (3)].str), (yyvsp[(3) - (3)].str));
         free((yyvsp[(1) - (3)].str)); free((yyvsp[(3) - (3)].str));
+        (yyval.str) = t;
     ;}
     break;
 
   case 19:
-#line 77 "parser.y"
+#line 130 "parser.y"
     { (yyval.str) = (yyvsp[(2) - (3)].str); ;}
     break;
 
 
 /* Line 1267 of yacc.c.  */
-#line 1472 "parser.tab.c"
+#line 1525 "parser.tab.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -1682,7 +1735,7 @@ yyreturn:
 }
 
 
-#line 80 "parser.y"
+#line 133 "parser.y"
 
 
 void yyerror(const char *s) {
@@ -1690,5 +1743,15 @@ void yyerror(const char *s) {
 }
 
 int main(void) {
-    return yyparse();
+    /* Prolog */
+    printf("#include <stdio.h>\n");
+    printf("#include \"posit8.h\"\n\n");
+    printf("int main(void) {\n");
+
+    int rc = yyparse();
+
+    /* Epilog */
+    printf("    return 0;\n");
+    printf("}\n");
+    return rc;
 }

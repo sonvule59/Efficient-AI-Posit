@@ -9,8 +9,5 @@ int main(void) {
     posit8 t2;
     posit8_add(&t2, t0, t1);
     posit8 x = t2;
-    double result0;
-    posit8_to_double(&result0, x);
-    printf("Result: %.6f\n", result0);
     return 0;
 }
