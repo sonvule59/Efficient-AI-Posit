@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "posit8.h"
+#include "posit16.h"
 
 void yyerror(const char *s);
 extern int yylex(void);
@@ -66,8 +67,16 @@ statement:
             printf("    posit8_to_double(&%s, %s);\n", result_var, $2);
             printf("    printf(\"Result: %%.6f\\n\", %s);\n", result_var);
             free(result_var);
+        } else if (strcmp($1, "posit16") == 0) {
+            /* Declare and assign from expression temp/value */
+            printf("    posit16 %s = %s;\n", $2, $4);
+            char *result_var = new_result_var();
+            printf("    double %s;\n", result_var);
+            printf("    posit16_to_double(&%s, %s);\n", result_var, $2);
+            printf("    printf(\"Result: %%.6f\\n\", %s);\n", result_var);
+            free(result_var);
         } else {
-            /* For now: only posit8 codegen is supported */
+            /* For now: only posit8 and posit16 codegen are supported */
             printf("    /* TODO: codegen for type %s */\n", $1);
         }
         free($1); free($2); free($4);
@@ -89,11 +98,20 @@ type:
 
 expression:
     POSIT_LITERAL {
-        /* Materialize literal into a posit8 temp via from_double */
+        /* Materialize literal into appropriate posit temp via from_double */
         char *num = strip_posit_suffix($1);
         char *t = new_temp();
-        printf("    posit8 %s;\n", t);
-        printf("    posit8_from_double(&%s, %s);\n", t, num);
+        
+        /* Determine posit type from literal suffix */
+        if (strstr($1, "p16") != NULL) {
+            printf("    posit16 %s;\n", t);
+            printf("    posit16_from_double(&%s, %s);\n", t, num);
+        } else {
+            /* Default to posit8 for p8 or no suffix */
+            printf("    posit8 %s;\n", t);
+            printf("    posit8_from_double(&%s, %s);\n", t, num);
+        }
+        
         free(num);
         free($1);
         $$ = t;
@@ -101,6 +119,7 @@ expression:
     | IDENTIFIER  { $$ = $1; }
     | expression PLUS expression {
         char *t = new_temp();
+        /* Determine result type based on operands - for now, default to posit8 */
         printf("    posit8 %s;\n", t);
         printf("    posit8_add(&%s, %s, %s);\n", t, $1, $3);
         free($1); free($3);
@@ -139,7 +158,8 @@ void yyerror(const char *s) {
 int main(void) {
     /* Prolog */
     printf("#include <stdio.h>\n");
-    printf("#include \"posit8.h\"\n\n");
+    printf("#include \"posit8.h\"\n");
+    printf("#include \"posit16.h\"\n\n");
     printf("int main(void) {\n");
 
     int rc = yyparse();

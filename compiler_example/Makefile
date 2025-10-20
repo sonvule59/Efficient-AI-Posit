@@ -20,8 +20,11 @@ parser.tab.c parser.tab.h: parser.y
 posit.lex.c: lexer.l
 	$(LEX) -o posit.lex.c lexer.l
 
-posit_test: main.o posit8.o softposit_fixed.o
-	$(CC) -o posit_test main.o posit8.o softposit_fixed.o -lm
+posit_test: main.o posit8.o posit16.o softposit_fixed.o
+	$(CC) -o posit_test main.o posit8.o posit16.o softposit_fixed.o -lm
+
+posit_visualizer: posit_visualizer.o posit8.o posit16.o softposit_fixed.o
+	$(CC) -o posit_visualizer posit_visualizer.o posit8.o posit16.o softposit_fixed.o -lm
 
 main.o: main.c posit8.h
 	$(CC) $(CFLAGS) -c main.c
@@ -29,8 +32,14 @@ main.o: main.c posit8.h
 posit8.o: posit8.c posit8.h softposit_fixed.h
 	$(CC) $(CFLAGS) -c posit8.c
 
+posit16.o: posit16.c posit16.h
+	$(CC) $(CFLAGS) -c posit16.c
+
+posit_visualizer.o: posit_visualizer.c posit8.h posit16.h
+	$(CC) $(CFLAGS) -c posit_visualizer.c
+
 softposit_fixed.o: softposit_fixed.c softposit_fixed.h
 	$(CC) $(CFLAGS) -c softposit_fixed.c
 
 clean:
-	rm -f *.o posit_compiler posit_test parser.tab.c parser.tab.h posit.lex.c
+	rm -f *.o posit_compiler posit_test posit_visualizer parser.tab.c parser.tab.h posit.lex.c
